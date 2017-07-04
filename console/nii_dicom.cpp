@@ -645,9 +645,12 @@ struct TDICOMdata clear_dicom_data() {
     strcpy(d.deviceSerialNumber, "");
     strcpy(d.softwareVersions, "");
     strcpy(d.seriesInstanceUID, "");
+    strcpy(d.frameOfReferenceUID, "");
     strcpy(d.studyID, "");
     strcpy(d.studyInstanceUID, "");
     strcpy(d.bodyPartExamined,"");
+
+
     d.phaseEncodingLines = 0;
     d.patientPositionSequentialRepeats = 0;
     d.isHasPhase = false;
@@ -718,6 +721,7 @@ struct TDICOMdata clear_dicom_data() {
     d.CSA.multiBandFactor = 1;
     d.CSA.SeriesHeader_offset = 0;
     d.CSA.SeriesHeader_length = 0;
+    d.sliceLocation = 0.0;
     return d;
 } //clear_dicom_data()
 
@@ -1886,7 +1890,7 @@ unsigned char * nii_loadImgCore(char* imgname, struct nifti_1_header hdr, int bi
     unsigned char *bImg = (unsigned char *)malloc(imgsz);
     size_t  sz = fread(bImg, 1, imgszRead, file);
 	fclose(file);
-	if (sz < imgszRead) {
+	if (sz > imgszRead) {
          printError("Only loaded %zu of %zu bytes for %s\n", sz, imgszRead, imgname);
          return NULL;
     }
@@ -2525,7 +2529,7 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
 	}
 	//Read file contents into buffer
 	size_t sz = fread(buffer, 1, MaxBufferSz, file);
-	if (sz < MaxBufferSz) {
+	if (sz > MaxBufferSz) {
          printError("Only loaded %zu of %zu bytes for %s\n", sz, MaxBufferSz, fname);
          fclose(file);
          return d;
@@ -2592,6 +2596,8 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
 #define  kImageNum 0x0020+(0x0013 << 16 )
 #define  kStudyInstanceUID 0x0020+(0x000D << 16 )
 #define  kSeriesInstanceUID 0x0020+(0x000E << 16 )
+#define  kFrameOfReferenceUID 0x0020+(0x0052 << 16 )
+#define  kSopInstanceUID 0x0008+(0x0018 << 16)
 #define  kPatientPosition 0x0020+(0x0032 << 16 )
 #define  kOrientationACR 0x0020+(0x0035 << 16 )
 #define  kOrientation 0x0020+(0x0037 << 16 )
@@ -2645,6 +2651,7 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
 #define  kImageStart 0x7FE0+(0x0010 << 16 )
 #define  kImageStartFloat 0x7FE0+(0x0008 << 16 )
 #define  kImageStartDouble 0x7FE0+(0x0009 << 16 )
+#define  kSliceLocation 0x0020+ (0x1041 <<16)
 #define kNest 0xFFFE +(0xE000 << 16 ) //Item follows SQ
 #define  kUnnest 0xFFFE +(0xE00D << 16 ) //ItemDelimitationItem [length defined] http://www.dabsoft.ch/dicom/5/7.5/
 #define  kUnnest2 0xFFFE +(0xE0DD << 16 )//SequenceDelimitationItem [length undefined]
@@ -2689,7 +2696,7 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
     			MaxBufferSz = fileLen - lFileOffset;
 			fseek(file, lFileOffset, SEEK_SET);
 			size_t sz = fread(buffer, 1, MaxBufferSz, file);
-			if (sz < MaxBufferSz) {
+			if (sz > MaxBufferSz) {
          		printError("Only loaded %zu of %zu bytes for %s\n", sz, MaxBufferSz, fname);
          		fclose(file);
          		return d;
@@ -2890,6 +2897,8 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
             case kManufacturersModelName :
             	dcmStr (lLength, &buffer[lPos], d.manufacturersModelName);
             	break;
+            case kSliceLocation:
+                d.sliceLocation = dcmStrFloat(lLength, &buffer[lPos]);
             case kDerivationDescription : {
                 //strcmp(transferSyntax, "1.2.840.10008.1.2")
                 char derivationDescription[kDICOMStr];
@@ -2941,6 +2950,12 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
 
             case kSeriesInstanceUID :
             	dcmStr (lLength, &buffer[lPos], d.seriesInstanceUID);
+                break;
+            case kFrameOfReferenceUID :
+                dcmStr (lLength, &buffer[lPos], d.frameOfReferenceUID);
+                break;
+            case kSopInstanceUID :
+                dcmStr (lLength, &buffer[lPos], d.sopInstanceUID);
                 break;
             case 	kPatientPosition :
                 if ((d.manufacturer == kMANUFACTURER_PHILIPS) && (is2005140FSQ)) {
@@ -3343,6 +3358,7 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
                     d.imageStart = (int)lPos + (int)lFileOffset;
                 isIconImageSequence = false;
                 break;
+
 
         } //switch/case for groupElement
         } //if nest
