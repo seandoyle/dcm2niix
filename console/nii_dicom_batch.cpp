@@ -512,22 +512,15 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
 	fprintf(fp, "\t\"ManufacturersModelName\": \"%s\",\n", d.manufacturersModelName );
 	if (!opts.isAnonymizeBIDS) {
 		if (strlen(d.seriesInstanceUID) > 0)
-			fprintf(fp, "\t\"SeriesInstanceUID\": \"%s\",\n", d.seriesInstanceUID );
-        if (strlen(d.frameOfReferenceUID) > 0)
-            fprintf(fp, "\t\"FrameOfReferenceUID\": \"%s\",\n", d.frameOfReferenceUID );
+		   fprintf(fp, "\t\"SeriesInstanceUID\": \"%s\",\n", d.seriesInstanceUID );
+		if (strlen(d.frameOfReferenceUID) > 0)
+		   fprintf(fp, "\t\"FrameOfReferenceUID\": \"%s\",\n", d.frameOfReferenceUID );
 		if (strlen(d.studyInstanceUID) > 0)
 			fprintf(fp, "\t\"StudyInstanceUID\": \"%s\",\n", d.studyInstanceUID );
 		if (strlen(d.referringPhysicianName) > 0)
 			fprintf(fp, "\t\"ReferringPhysicianName\": \"%s\",\n", d.referringPhysicianName );
 		if (strlen(d.studyID) > 0)
 			fprintf(fp, "\t\"StudyID\": \"%s\",\n", d.studyID );
-        //if (d.sliceLocation != 0.0)
-         //   fprintf(fp, "\t\"SliceLocation\": %f,\n", d.sliceLocation );
-		//Next lines directly reveal patient identity
-		//if (strlen(d.patientName) > 0)
-		//	fprintf(fp, "\t\"PatientName\": \"%s\",\n", d.patientName );
-		//if (strlen(d.patientID) > 0)
-		//	fprintf(fp, "\t\"PatientID\": \"%s\",\n", d.patientID );
 	}
 	#ifdef myReadAsciiCsa
 	if ((d.manufacturer == kMANUFACTURER_SIEMENS) && (d.CSA.SeriesHeader_offset > 0) && (d.CSA.SeriesHeader_length > 0) &&
@@ -702,7 +695,7 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
 		fprintf(fp, "\",\n");
 	} //only save PhaseEncodingDirection if BOTH direction and POLARITY are known
 	fprintf(fp, "\t\"ConversionSoftware\": \"dcm2niix\",\n");
-	fprintf(fp, "\t\"ConversionSoftwareVersion\": \"%s\"\n", kDCMvers );
+	fprintf(fp, "\t\"ConversionSoftwareVersion\": \"%s\",\n", kDCMvers );
     fprintf(fp, "\t\"Images\":[\n");
     int maxIndex = dcmSort[0].indx + nConvert;
     // SWD
@@ -712,10 +705,11 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
 
         fprintf(fp, "\t\t{\"ImageNumber\":%d, \"SopInstanceUID\": \"%s\"",
                 aDataum.imageNum, aDataum.sopInstanceUID);
-        fprintf(fp, ", \"SeriesNum\":%ld,", aDataum.seriesNum);
-        fprintf(fp, ", \"SortIndex\":%d,", sortIndex);
+        fprintf(fp, ", \"SeriesNum\":%ld ", aDataum.seriesNum);
+        fprintf(fp, ", \"NiftiSlice\":%d ", i);
+	//        fprintf(fp, ", \"SortIndex\":%d,", sortIndex);
 
-        fprintf(fp, ", \"InterIndex\":%lu,", dcmSort[i].img);
+	//        fprintf(fp, ", \"InterIndex\":%lu,", dcmSort[i].img);
 
          if (d.sliceLocation != 0.0)
             fprintf(fp, ", \"SliceLocation\": %f ", aDataum.sliceLocation );
