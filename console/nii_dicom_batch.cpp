@@ -546,8 +546,8 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
 		fprintf(fp, "\t\"AcquisitionNumber\": %d,\n", d.acquNum);
 	if (strlen(d.institutionName) > 0)
 		fprintf(fp, "\t\"InstitutionName\": \"%s\",\n", d.institutionName );
-	if (strlen(d.institutionAddress) > 0)
-		fprintf(fp, "\t\"InstitutionName\": \"%s\",\n", d.institutionAddress );
+	//if (strlen(d.institutionAddress) > 0)
+	//	fprintf(fp, "\t\"institutionAddress\": \"%s\",\n", d.institutionAddress );
 	if (strlen(d.deviceSerialNumber) > 0)
 		fprintf(fp, "\t\"DeviceSerialNumber\": \"%s\",\n", d.deviceSerialNumber );
 	if (strlen(d.softwareVersions) > 0)
