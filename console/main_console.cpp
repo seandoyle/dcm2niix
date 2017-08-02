@@ -23,7 +23,7 @@
 
 //Alternatively, windows users with VisualStudio can compile this project
 // vcvarsall amd64
-// cl /EHsc main_console.cpp nii_dicom.cpp jpg_0XC3.cpp ujpeg.cpp nifti1_io_core.cpp nii_ortho.cpp nii_dicom_batch.cpp -DmyDisableOpenJPEG -DmyDisableJasper /odcm2niix
+// cl /EHsc main_console.cpp nii_foreign.cpp nii_dicom.cpp jpg_0XC3.cpp ujpeg.cpp nifti1_io_core.cpp nii_ortho.cpp nii_dicom_batch.cpp -DmyDisableOpenJPEG /o dcm2niix
 
 
 //#define mydebugtest //automatically process directory specified in main, ignore input arguments
@@ -82,10 +82,9 @@ void showHelp(const char * argv[], struct TDCMopts opts) {
     #else
      #define kQstr ""
     #endif
-    printf("  -f : filename (%%a=antenna  (coil) number, %%c=comments, %%d=description, %%e echo number, %%f=folder name, %%i ID of patient, %%j seriesInstanceUID, %%k studyInstanceUID, %%m=manufacturer, %%n=name of patient, %%p=protocol,%s %%s=series number, %%t=time, %%u=acquisition number, %%x study ID; %%z sequence name; default '%s')\n", kQstr, opts.filename);
+    printf("  -f : filename (%%a=antenna  (coil) number, %%c=comments, %%d=description, %%e echo number, %%f=folder name, %%i ID of patient, %%j seriesInstanceUID, %%k studyInstanceUID, %%m=manufacturer, %%n=name of patient, %%p=protocol,%s %%s=series number, %%t=time, %%u=acquisition number, %%v=vendor, %%x=study ID; %%z sequence name; default '%s')\n", kQstr, opts.filename);
     printf("  -h : show help\n");
     printf("  -i : ignore derived, localizer and 2D images (y/n, default n)\n");
-    printf("  -t : text notes includes private patient details (y/n, default n)\n");
     printf("  -m : merge 2D slices from same series regardless of study time, echo, coil, orientation, etc. (y/n, default n)\n");
     printf("  -o : output directory (omit to save to input folder)\n");
     printf("  -p : Philips precise float (not display) scaling (y/n, default y)\n");
@@ -126,8 +125,20 @@ void showHelp(const char * argv[], struct TDCMopts opts) {
 #endif
 } //showHelp()
 
-//#define mydebugtest
+int invalidParam(int i, const char * argv[]) {
+	if ((argv[i][0] == 'y') || (argv[i][0] == 'Y')
+		|| (argv[i][0] == 'n') || (argv[i][0] == 'N')
+		|| (argv[i][0] == 'h') || (argv[i][0] == 'H')
+		|| (argv[i][0] == 'i') || (argv[i][0] == 'I')
+		|| (argv[i][0] == '0') || (argv[i][0] == '1'))
+		return 0;
 
+	//if (argv[i][0] != '-') return 0;
+	printf(" Error: invalid option '%s %s'\n", argv[i-1], argv[i]);
+	return 1;
+}
+
+//#define mydebugtest
 int main(int argc, const char * argv[])
 {
     struct TDCMopts opts;
@@ -163,33 +174,37 @@ int main(int argc, const char * argv[])
             } else if ((argv[i][1] == 'b') && ((i+1) < argc)) {
                 if (strlen(argv[i]) < 3) { //"-b y"
                 	i++;
+                	if (invalidParam(i, argv)) return 0;
                 	if ((argv[i][0] == 'n') || (argv[i][0] == 'N')  || (argv[i][0] == '0'))
                     	opts.isCreateBIDS = false;
                 	else
                     	opts.isCreateBIDS = true;
                 } else if (argv[i][2] == 'a') {//"-ba y"
                 	i++;
+                	if (invalidParam(i, argv)) return 0;
                 	if ((argv[i][0] == 'n') || (argv[i][0] == 'N')  || (argv[i][0] == '0'))
                     	opts.isAnonymizeBIDS = false;
                 	else
                     	opts.isAnonymizeBIDS = true;
-
                 } else
                 	printf("Error: Unknown command line argument: '%s'\n", argv[i]);
             } else if ((argv[i][1] == 'i') && ((i+1) < argc)) {
                 i++;
+                if (invalidParam(i, argv)) return 0;
                 if ((argv[i][0] == 'n') || (argv[i][0] == 'N')  || (argv[i][0] == '0'))
                     opts.isIgnoreDerivedAnd2D = false;
                 else
                     opts.isIgnoreDerivedAnd2D = true;
             } else if ((argv[i][1] == 'm') && ((i+1) < argc)) {
                 i++;
+                if (invalidParam(i, argv)) return 0;
                 if ((argv[i][0] == 'n') || (argv[i][0] == 'N')  || (argv[i][0] == '0'))
                     opts.isForceStackSameSeries = false;
                 else
                     opts.isForceStackSameSeries = true;
             } else if ((argv[i][1] == 'p') && ((i+1) < argc)) {
                 i++;
+                if (invalidParam(i, argv)) return 0;
                 if ((argv[i][0] == 'n') || (argv[i][0] == 'N')  || (argv[i][0] == '0'))
                     opts.isPhilipsFloatNotDisplayScaling = false;
                 else
@@ -197,18 +212,21 @@ int main(int argc, const char * argv[])
 
             } else if ((argv[i][1] == 's') && ((i+1) < argc)) {
                 i++;
+                if (invalidParam(i, argv)) return 0;
                 if ((argv[i][0] == 'n') || (argv[i][0] == 'N')  || (argv[i][0] == '0'))
                     opts.isOnlySingleFile = false;
                 else
                     opts.isOnlySingleFile = true;
             } else if ((argv[i][1] == 't') && ((i+1) < argc)) {
                 i++;
+                if (invalidParam(i, argv)) return 0;
                 if ((argv[i][0] == 'n') || (argv[i][0] == 'N')  || (argv[i][0] == '0'))
                     opts.isCreateText = false;
                 else
                     opts.isCreateText = true;
             } else if ((argv[i][1] == 'v') && ((i+1) < argc)) {
                 i++;
+                if (invalidParam(i, argv)) return 0;
                 if ((argv[i][0] == 'n') || (argv[i][0] == 'N')  || (argv[i][0] == '0')) //0: verbose OFF
                     opts.isVerbose = 0;
                 else if ((argv[i][0] == 'h') || (argv[i][0] == 'H')  || (argv[i][0] == '2')) //2: verbose HYPER
@@ -217,12 +235,14 @@ int main(int argc, const char * argv[])
                     opts.isVerbose = 1; //1: verbose ON
             } else if ((argv[i][1] == 'x') && ((i+1) < argc)) {
                 i++;
+                if (invalidParam(i, argv)) return 0;
                 if ((argv[i][0] == 'n') || (argv[i][0] == 'N')  || (argv[i][0] == '0'))
                     opts.isCrop = false;
                 else
                     opts.isCrop = true;
             } else if ((argv[i][1] == 'z') && ((i+1) < argc)) {
                 i++;
+                if (invalidParam(i, argv)) return 0;
                 if ((argv[i][0] == 'i') || (argv[i][0] == 'I') ) {
                     opts.isGz = true; //force use of internal compression instead of pigz
                 	strcpy(opts.pigzname,"");

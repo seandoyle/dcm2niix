@@ -11,12 +11,18 @@ This software is open source. The bulk of the code is covered by the BSD license
 
 ## Versions
 
-13-June-2017
- - Read DICOM header in 1Mb segments rather than loading whole file : reduces ram usage and [faster for systems with slow io](https://github.com/rordenlab/dcm2niix/issues/104).
+24-July-2017
+ - Compiles with recent releases of [OpenJPEG](https://github.com/neurolabusc/dcm_qa/issues/5#issuecomment-317443179) for JPEG2000 support.
 
-9-June-2017
- -Report [TotalReadoutTime](https://github.com/rordenlab/dcm2niix/issues/98).
- -Fix JPEG2000 support in [Superbuild](https://github.com/rordenlab/dcm2niix/issues/105).
+23-June-2017
+ - [Ensure slice timing always encoded for Siemens EPI](https://github.com/neurolabusc/dcm_qa/issues/4#issuecomment-310707906)
+ - [Integrates validation](https://github.com/neurolabusc/dcm_qa)
+ - JSON fix (InstitutionName -> InstitutionAddress)
+
+21-June-2017
+ - Read DICOM header in 1Mb segments rather than loading whole file : reduces ram usage and [faster for systems with slow io](https://github.com/rordenlab/dcm2niix/issues/104).
+ - Report [TotalReadoutTime](https://github.com/rordenlab/dcm2niix/issues/98).
+ - Fix JPEG2000 support in [Superbuild](https://github.com/rordenlab/dcm2niix/issues/105).
 
 28-May-2017
  - Remove all derived images from [Philips DTI series](http://www.nitrc.org/forum/message.php?msg_id=21025).
@@ -159,7 +165,13 @@ make
 
 **optional building with OpenJPEG:**
 
-Support for JPEG2000 using OpenJPEG is optional. To build with OpenJPEG change the cmake command to `cmake -DUSE_OPENJPEG=ON ..`
+Support for JPEG2000 using OpenJPEG is optional. To build with OpenJPEG change the cmake command to `cmake -DUSE_OPENJPEG=ON ..`:
+
+```bash
+mkdir build && cd build
+cmake -DUSE_OPENJPEG=ON ..
+make
+```
 
 **optional batch processing version:**
 
