@@ -2158,6 +2158,12 @@ bool isSameSet (struct TDICOMdata d1, struct TDICOMdata d2, bool isForceStackSam
     if (!d1.isValid) return false;
     if (!d2.isValid) return false;
 	if (d1.seriesNum != d2.seriesNum) return false;
+      //SWD
+    if ((strcmp(d1.seriesInstanceUID, d2.seriesInstanceUID) != 0)) {
+        printMessage("Images with same seriesNumber but not SeriesInstanceUID %s, %s\n",
+           d1.seriesInstanceUID,d2.seriesInstanceUID);
+        return false;
+    }
 	#ifdef mySegmentByAcq
     if (d1.acquNum != d2.acquNum) return false;
     #else
