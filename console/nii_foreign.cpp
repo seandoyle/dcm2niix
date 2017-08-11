@@ -400,7 +400,7 @@ int  convert_foreign (const char *fn, struct TDCMopts opts){
 	printMessage("Saving ECAT as '%s'\n", niiFilename);
 	if (ret != EXIT_SUCCESS) return ret;
 	struct TDTI4D dti4D;
-	dti4D.S[0].sliceTiming = -1.0;
+	//dti4D.S[0].sliceTiming = -1.0; // swd hack
         TDICOMdata * dcmList =NULL;
 
 	//nii_SaveBIDS(niiFilename, dcm, opts, &dti4D, &hdr, fn, 1, (unsigned long long) 0, &dcmList);

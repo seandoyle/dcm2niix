@@ -2645,6 +2645,9 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
 #define  kImageStartFloat 0x7FE0+(0x0008 << 16 )
 #define  kImageStartDouble 0x7FE0+(0x0009 << 16 )
 #define  kSliceLocation 0x0020+ (0x1041 <<16)
+#define  kPhotometricInterpretation 0x0028 + (0x0004 <<16)
+#define  kSliceThickness 0x0018 + (0x0050 <<16)
+#define  kPixelSpacing 0x0028 + (0x0030<<16)
 #define kNest 0xFFFE +(0xE000 << 16 ) //Item follows SQ
 #define  kUnnest  0xFFFE +(0xE00D << 16 ) //ItemDelimitationItem [length defined] http://www.dabsoft.ch/dicom/5/7.5/
 #define  kUnnest2 0xFFFE +(0xE0DD << 16 )//SequenceDelimitationItem [length undefined]
