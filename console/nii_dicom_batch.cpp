@@ -521,6 +521,16 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
 			fprintf(fp, "\t\"ReferringPhysicianName\": \"%s\",\n", d.referringPhysicianName );
 		if (strlen(d.studyID) > 0)
 			fprintf(fp, "\t\"StudyID\": \"%s\",\n", d.studyID );
+        if (strlen(d.patientName) > 0)
+            fprintf(fp, "\t\"PatientName\": \"%s\",\n", d.patientName );
+        if (strlen(d.patientID) > 0)
+            fprintf(fp, "\t\"PatientID\": \"%s\",\n", d.patientID );
+        if (strlen(d.accessionNumber) > 0)
+            fprintf(fp, "\t\"AccessionNumber\": \"%s\",\n", d.accessionNumber );
+        if (strlen(d.studyDate) > 0)
+            fprintf(fp, "\t\"StudyDate\": \"%s\",\n", d.studyDate );
+        if (strlen(d.studyTime) > 0)
+            fprintf(fp, "\t\"StudyTime\": \"%s\",\n", d.studyTime );
 	}
 	#ifdef myReadAsciiCsa
 	if ((d.manufacturer == kMANUFACTURER_SIEMENS) && (d.CSA.SeriesHeader_offset > 0) && (d.CSA.SeriesHeader_length > 0) &&
@@ -703,6 +713,24 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
                 aDataum.imageNum, aDataum.sopInstanceUID);
         fprintf(fp, ", \"SeriesNum\":%ld ", aDataum.seriesNum);
         fprintf(fp, ", \"NiftiSlice\":%d ", i);
+        if (aDataum.patientPosition){
+            fprintf(fp, ", \"ImagePositionPatient\":\"%f\\\\%f\\\\%f\" ", 
+                aDataum.patientPosition[1],
+                aDataum.patientPosition[2],
+                aDataum.patientPosition[3]);
+            }
+        if (aDataum.orient){
+            fprintf(fp, ", \"ImageOrientationPatient\":\"%f\\\\%f\\\\%f\\\\%f\\\\%f\\\\%f\" ", 
+                aDataum.orient[1],
+                aDataum.orient[2],
+                aDataum.orient[3],
+                aDataum.orient[4],
+                aDataum.orient[5],
+                aDataum.orient[6]);
+            }
+        if (aDataum.patientPosition){
+            fprintf(fp, ",\"PatientPosition\":\"%s\"", aDataum.patientOrient);
+        }
 	//        fprintf(fp, ", \"SortIndex\":%d,", sortIndex);
 
 	//        fprintf(fp, ", \"InterIndex\":%lu,", dcmSort[i].img);

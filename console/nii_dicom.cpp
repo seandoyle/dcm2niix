@@ -2589,6 +2589,7 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
 #define  kImageNum 0x0020+(0x0013 << 16 )
 #define  kStudyInstanceUID 0x0020+(0x000D << 16 )
 #define  kSeriesInstanceUID 0x0020+(0x000E << 16 )
+#define  kAccessionNumber 0x0008+(0x0050 << 16)
 #define  kFrameOfReferenceUID 0x0020+(0x0052 << 16 )
 #define  kSopInstanceUID 0x0008+(0x0018 << 16)
 #define  kPatientPosition 0x0020+(0x0032 << 16 )
@@ -2893,6 +2894,9 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
                 break;
             case kPatientID :
                 dcmStr (lLength, &buffer[lPos], d.patientID);
+                break;
+             case kAccessionNumber :
+                dcmStr (lLength, &buffer[lPos], d.accessionNumber);
                 break;
             case kSeriesDescription: {
                 dcmStr (lLength, &buffer[lPos], d.seriesDescription);
