@@ -731,12 +731,25 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
         if (aDataum.patientPosition){
             fprintf(fp, ",\"PatientPosition\":\"%s\"", aDataum.patientOrient);
         }
+        if (aDataum.windowCenter){
+            fprintf(fp, ",\"WindowCenter\":%d ", aDataum.windowCenter);
+        }
+        if (aDataum.windowWidth){
+            fprintf(fp, ",\"WindowWidth\":%d ", aDataum.windowWidth);
+        }
 	//        fprintf(fp, ", \"SortIndex\":%d,", sortIndex);
 
 	//        fprintf(fp, ", \"InterIndex\":%lu,", dcmSort[i].img);
 
-         if (d.sliceLocation != 0.0)
+        if (aDataum.sliceLocation != 0.0)
             fprintf(fp, ", \"SliceLocation\": %f ", aDataum.sliceLocation );
+        if (aDataum.xyzMM ){
+            fprintf(fp, ", \"SliceThickness\":%f" , 
+                aDataum.xyzMM[3]);
+        }
+        if (aDataum.xyzMM){
+             fprintf(fp, ",\"PixelSpacing\":\"%f\\\\%f\"", aDataum.xyzMM[1],aDataum.xyzMM[2] );
+        }
         if (i==(nConvert-1)){
             fprintf(fp, "}\n");
         }

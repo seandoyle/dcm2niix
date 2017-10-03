@@ -2647,8 +2647,9 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
 #define  kImageStartDouble 0x7FE0+(0x0009 << 16 )
 #define  kSliceLocation 0x0020+ (0x1041 <<16)
 #define  kPhotometricInterpretation 0x0028 + (0x0004 <<16)
-#define  kSliceThickness 0x0018 + (0x0050 <<16)
-#define  kPixelSpacing 0x0028 + (0x0030<<16)
+//#define  kPixelSpacing 0x0028 + (0x0030<<16)
+#define  kWindowCenter 0x0028 + (0x1050<<16)
+#define  kWindowWidth 0x0028 + (0x1051<<16)   
 #define kNest 0xFFFE +(0xE000 << 16 ) //Item follows SQ
 #define  kUnnest  0xFFFE +(0xE00D << 16 ) //ItemDelimitationItem [length defined] http://www.dabsoft.ch/dicom/5/7.5/
 #define  kUnnest2 0xFFFE +(0xE0DD << 16 )//SequenceDelimitationItem [length undefined]
@@ -2964,6 +2965,12 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
             case kSopInstanceUID :
                 dcmStr (lLength, &buffer[lPos], d.sopInstanceUID);
                 break;
+            case kWindowWidth:
+                d.windowWidth =  dcmStrInt(lLength, &buffer[lPos]);
+                break;
+            case kWindowCenter:
+                d.windowCenter =  dcmStrInt(lLength, &buffer[lPos]);
+                break;
             case 	kPatientPosition :
                 if ((d.manufacturer == kMANUFACTURER_PHILIPS) && (is2005140FSQ)) {
                     if (!is2005140FSQwarned)
@@ -3027,6 +3034,7 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
                 break;
             case 	kXYSpacing:
                 dcmMultiFloat(lLength, (char*)&buffer[lPos], 2, d.xyzMM);
+                dcmStr (lLength, &buffer[lPos], d.pixelSpacing);
                 break;
             case 	kImageComments:
                 dcmStr (lLength, &buffer[lPos], d.imageComments);
