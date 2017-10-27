@@ -523,8 +523,12 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
 			fprintf(fp, "\t\"StudyID\": \"%s\",\n", d.studyID );
         if (strlen(d.patientName) > 0)
             fprintf(fp, "\t\"PatientName\": \"%s\",\n", d.patientName );
+        if (strlen(d.birthDate) > 0)
+            fprintf(fp, "\t\"PatientBirthDate\": \"%s\",\n", d.birthDate );
         if (strlen(d.patientID) > 0)
             fprintf(fp, "\t\"PatientID\": \"%s\",\n", d.patientID );
+        if (strlen(d.gender) > 0)
+            fprintf(fp, "\t\"PatientSex\": \"%s\",\n", d.gender );
         if (strlen(d.accessionNumber) > 0)
             fprintf(fp, "\t\"AccessionNumber\": \"%s\",\n", d.accessionNumber );
         if (strlen(d.studyDate) > 0)
@@ -576,6 +580,8 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
 		fprintf(fp, "\t\"ProtocolName\": \"%s\",\n", d.protocolName );
 	if (strlen(d.sequenceName) > 0)
 		fprintf(fp, "\t\"SequenceName\": \"%s\",\n", d.sequenceName );
+    if (strlen(d.studyID) > 0)
+        fprintf(fp, "\t\"StudyID\": \"%s\",\n", d.studyID );
 
 	if (strlen(d.imageType) > 0) {
 		fprintf(fp, "\t\"ImageType\": [\"");
@@ -745,7 +751,7 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
             fprintf(fp, ", \"SliceLocation\": %f ", aDataum.sliceLocation );
         if (aDataum.xyzMM ){
             fprintf(fp, ", \"SliceThickness\":%f" , 
-                aDataum.xyzMM[3]);
+                aDataum.sliceThickness);
         }
         if (aDataum.xyzMM){
              fprintf(fp, ",\"PixelSpacing\":\"%f\\\\%f\"", aDataum.xyzMM[1],aDataum.xyzMM[2] );
@@ -2200,6 +2206,11 @@ bool isSameSet (struct TDICOMdata d1, struct TDICOMdata d2, bool isForceStackSam
     if (!d2.isValid) return false;
 	if (d1.seriesNum != d2.seriesNum) return false;
       //SWD
+     if ((strcmp(d1.studyInstanceUID, d2.studyInstanceUID) != 0)) {
+        printMessage("Images have different StudyInstanceUIDs: %s, %s\n",
+           d1.studyInstanceUID,d2.studyInstanceUID);
+        return false;
+    }
     if ((strcmp(d1.seriesInstanceUID, d2.seriesInstanceUID) != 0)) {
         printMessage("Images with same seriesNumber but not SeriesInstanceUID %s, %s\n",
            d1.seriesInstanceUID,d2.seriesInstanceUID);

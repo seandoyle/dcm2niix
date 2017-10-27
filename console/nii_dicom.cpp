@@ -505,7 +505,7 @@ mat44 set_nii_header(struct TDICOMdata d) {
 	#endif
 }
 #endif
-
+/* Duplicate SWD
 float deFuzz(float v) {
     if (fabs(v) < 0.00001)
         return 0;
@@ -513,11 +513,15 @@ float deFuzz(float v) {
         return v;
 
 }
+*/
 
 // This code predates  Xiangrui Li's set_nii_header function
 mat44 set_nii_header_x(struct TDICOMdata d, struct TDICOMdata d2, struct nifti_1_header *h, int* sliceDir) {
     *sliceDir = 0;
     mat44 Q44 = nifti_dicom2mat(d.orient, d.patientPosition, d.xyzMM);
+    #ifdef MY_DEBUG
+    printMessage(" set_nii_header_x d.CSA.mosaicSlices= %f\n", (float)d.CSA.mosaicSlices);
+    #endif
     if (d.CSA.mosaicSlices > 1) {
         double nRowCol = ceil(sqrt((double) d.CSA.mosaicSlices));
         double lFactorX = (d.xyzDim[1] -(d.xyzDim[1]/nRowCol)   )/2.0;
@@ -554,6 +558,9 @@ mat44 set_nii_header_x(struct TDICOMdata d, struct TDICOMdata d2, struct nifti_1
 int headerDcm2NiiSForm(struct TDICOMdata d, struct TDICOMdata d2,  struct nifti_1_header *h, int isVerbose) { //fill header s and q form
     //see http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
     //returns sliceDir: 0=unknown,1=sag,2=coro,3=axial,-=reversed slices
+    #ifdef MY_DEBUG
+    printMessage("headerDcm2NiiSForm");
+    #endif
     int sliceDir = 0;
     if (h->dim[3] < 2) {
     	mat44 Q44 = set_nii_header_x(d, d2, h, &sliceDir);
@@ -581,6 +588,9 @@ int headerDcm2NiiSForm(struct TDICOMdata d, struct TDICOMdata d2,  struct nifti_
 } //headerDcm2NiiSForm()
 
 int headerDcm2Nii2(struct TDICOMdata d, struct TDICOMdata d2, struct nifti_1_header *h) { //final pass after de-mosaic
+    #ifdef MY_DEBUG
+    printMessage("headerDcm2Nii2");
+    #endif
     char txt[1024] = {""};
     if (h->slice_code == NIFTI_SLICE_UNKNOWN) h->slice_code = d.CSA.sliceOrder;
     if (h->slice_code == NIFTI_SLICE_UNKNOWN) h->slice_code = d2.CSA.sliceOrder; //sometimes the first slice order is screwed up https://github.com/eauerbach/CMRR-MB/issues/29
@@ -655,11 +665,15 @@ struct TDICOMdata clear_dicom_data() {
     strcpy(d.institutionAddress, "");
     strcpy(d.deviceSerialNumber, "");
     strcpy(d.softwareVersions, "");
+    strcpy(d.studyInstanceUID, "");
     strcpy(d.seriesInstanceUID, "");
+    strcpy(d.sopInstanceUID, "");
     strcpy(d.frameOfReferenceUID, "");
     strcpy(d.studyID, "");
     strcpy(d.studyInstanceUID, "");
     strcpy(d.bodyPartExamined,"");
+    strcpy(d.birthDate, "");
+    strcpy(d.gender, "");
 
 
     d.phaseEncodingLines = 0;
@@ -1164,7 +1178,8 @@ float dcmStrFloat (int lByteLength, unsigned char lBuffer[]) { //read float stor
 } //dcmStrFloat()
 
 int headerDcm2Nii(struct TDICOMdata d, struct nifti_1_header *h, bool isComputeSForm) {
-    //printMessage("bytes %dx%dx%d %d, %d\n",d.XYZdim[1],d.XYZdim[2],d.XYZdim[3], d.Allocbits_per_pixel, d.samplesPerPixel);
+    
+    printMessage("bytes %dx%dx%d %d, %d\n",d.xyzDim[1],d.xyzDim[2],d.xyzDim[3], d.bitsAllocated, d.samplesPerPixel);
 	memset(h, 0, sizeof(nifti_1_header)); //zero-fill structure so unused items are consistent
     for (int i = 0; i < 80; i++) h->descrip[i] = 0;
     for (int i = 0; i < 24; i++) h->aux_file[i] = 0;
@@ -1285,6 +1300,7 @@ void changeExt (char *file_name, const char* ext) {
 } //changeExt()
 
 struct TDICOMdata  nii_readParRec (char * parname, int isVerbose, struct TDTI4D *dti4D) {
+    printMessage("nii_readParRec");
     struct TDICOMdata d = clear_dicom_data();
     strcpy(d.protocolName, ""); //erase dummy with empty
     strcpy(d.seriesDescription, ""); //erase dummy with empty
@@ -2550,7 +2566,9 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
 #define  kDerivationDescription 0x0008+(0x2111 << 16 )
 #define  kComplexImageComponent (uint32_t) 0x0008+(0x9208 << 16 )//'0008' '9208' 'CS' 'ComplexImageComponent'
 #define  kPatientName 0x0010+(0x0010 << 16 )
+#define  kPatientBirthDate 0x0010+(0x0030<<16)
 #define  kPatientID 0x0010+(0x0020 << 16 )
+#define  kPatientSex 0x0010+(0x0040 <<16)
 #define  kBodyPartExamined 0x0018+(0x0015 << 16)
 #define  kScanningSequence 0x0018+(0x0020 << 16)
 #define  kSequenceVariant 0x0018+(0x0021 << 16)
@@ -2595,6 +2613,7 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
 #define  kPatientPosition 0x0020+(0x0032 << 16 )
 #define  kOrientationACR 0x0020+(0x0035 << 16 )
 #define  kOrientation 0x0020+(0x0037 << 16 )
+#define  kLaterality 0x0020+(0x0060 << 16 )
 #define  kImagesInAcquisition 0x0020+(0x1002 << 16 ) //IS
 #define  kImageComments 0x0020+(0x4000<< 16 )// '0020' '4000' 'LT' 'ImageComments'
 #define  kLocationsInAcquisitionGE 0x0021+(0x104F<< 16 )// 'SS' 'LocationsInAcquisitionGE'
@@ -2890,7 +2909,13 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
             case 	kStudyTime :
                 dcmStr (lLength, &buffer[lPos], d.studyTime);
                 break;
-            case 	kPatientName :
+            case    kPatientBirthDate :
+                dcmStr (lLength, &buffer[lPos], d.birthDate);
+                break;
+            case    kPatientSex :
+                dcmStr (lLength, &buffer[lPos], d.gender);
+                break;
+            case    kPatientName :
                 dcmStr (lLength, &buffer[lPos], d.patientName);
                 break;
             case kPatientID :
@@ -3123,6 +3148,7 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
                 break;
             case 	kZThick :
                 d.xyzMM[3] = dcmStrFloat(lLength, &buffer[lPos]);
+                d.sliceThickness =d.xyzMM[3];
                 break;
             case 	kCoilSiemens : {
                 if (d.manufacturer == kMANUFACTURER_SIEMENS) {
@@ -3455,7 +3481,7 @@ struct TDICOMdata readDICOMv(char * fname, int isVerbose, int compressFlag, stru
         d.xyzMM[3] = 1.0;
     }
     //printMessage("Patient Position\t%g\t%g\t%g\tThick\t%g\n",d.patientPosition[1],d.patientPosition[2],d.patientPosition[3], d.xyzMM[3]);
-    //printMessage("Patient Position\t%g\t%g\t%g\tThick\t%g\tStart\t%d\n",d.patientPosition[1],d.patientPosition[2],d.patientPosition[3], d.xyzMM[3], d.imageStart);
+    printMessage("Patient Position\t%g\t%g\t%g\tThick\t%g\tStart\t%d\n",d.patientPosition[1],d.patientPosition[2],d.patientPosition[3], d.xyzMM[3], d.imageStart);
     // printMessage("ser %ld\n", d.seriesNum);
 
 
