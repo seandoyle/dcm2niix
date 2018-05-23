@@ -715,6 +715,7 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
         int sortIndex = (int) dcmSort[i].indx;
         TDICOMdata aDataum = dcmList[dcmSort[i].indx];
 
+
         fprintf(fp, "\t\t{\"ImageNumber\":%d, \"SopInstanceUID\": \"%s\"",
                 aDataum.imageNum, aDataum.sopInstanceUID);
         fprintf(fp, ", \"SeriesNum\":%ld ", aDataum.seriesNum);
@@ -733,6 +734,7 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
                 aDataum.orient[4],
                 aDataum.orient[5],
                 aDataum.orient[6]);
+              fprintf(fp, ", \"SliceLocation\": %f ", aDataum.sliceLocation );
             }
         if (aDataum.patientPosition){
             fprintf(fp, ",\"PatientPosition\":\"%s\"", aDataum.patientOrient);
@@ -746,9 +748,7 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
 	//        fprintf(fp, ", \"SortIndex\":%d,", sortIndex);
 
 	//        fprintf(fp, ", \"InterIndex\":%lu,", dcmSort[i].img);
-
-        if (aDataum.sliceLocation != 0.0)
-            fprintf(fp, ", \"SliceLocation\": %f ", aDataum.sliceLocation );
+          
         if (aDataum.xyzMM ){
             fprintf(fp, ", \"SliceThickness\":%f" , 
                 aDataum.sliceThickness);
