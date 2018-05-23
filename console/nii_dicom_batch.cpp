@@ -739,12 +739,10 @@ void nii_SaveBIDS(char pathoutname[], struct TDICOMdata d, struct TDCMopts opts,
         if (aDataum.patientPosition){
             fprintf(fp, ",\"PatientPosition\":\"%s\"", aDataum.patientOrient);
         }
-        if (aDataum.windowCenter){
-            fprintf(fp, ",\"WindowCenter\":%d ", aDataum.windowCenter);
-        }
-        if (aDataum.windowWidth){
-            fprintf(fp, ",\"WindowWidth\":%d ", aDataum.windowWidth);
-        }
+       
+        fprintf(fp, ",\"WindowCenter\":%d ", aDataum.windowCenter);
+        fprintf(fp, ",\"WindowWidth\":%d ", aDataum.windowWidth);
+        
 	//        fprintf(fp, ", \"SortIndex\":%d,", sortIndex);
 
 	//        fprintf(fp, ", \"InterIndex\":%lu,", dcmSort[i].img);
